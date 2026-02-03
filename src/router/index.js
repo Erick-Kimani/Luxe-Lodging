@@ -1,0 +1,204 @@
+import { createRouter, createWebHistory } from "vue-router"
+
+// Views
+import Home from "@/views/Home.vue"
+import AboutUs from "@/views/Aboutus.vue"
+import Login from "@/views/Login.vue"
+import Signup from "@/views/Signup.vue"
+import ContactUs from "@/views/ContactUs.vue"
+import Transit from "@/views/Transit.vue"
+import TransitDetails from "@/views/TransitDetails.vue"
+import Administrator from "@/views/Administrator.vue"
+import Choice from "@/views/Choice.vue"
+import Meeting from "@/views/Meeting.vue"
+import MeetingDetails from "@/views/MeetingDetails.vue"
+import Service from "@/views/Service.vue"
+import ServiceDetails from "@/views/ServiceDetails.vue"
+import Transport from "@/views/Transport.vue"
+import TransportDetails from "@/views/TransportDetails.vue"
+import Vacation from "@/views/Vacation.vue"
+import VacationDetails from "@/views/VacationDetails.vue"
+
+// Blog (Landing Page)
+import Blog from "@/components/Blog.vue"
+
+// Services
+import api from "@/services/api"
+import TokenService from "@/services/TokenService"
+import AuthService from "@/services/authService"
+
+const routes = [
+  /* =========================
+     🌍 PUBLIC ROUTES
+  ========================== */
+
+  {
+    path: "/blog",
+    name: "blog",
+    component: Blog,
+    meta: {
+      hideLayout: true // 🚫 Hide Navbar & Footer
+    }
+  },
+  {
+    path: "/login",
+    name: "login",
+    component: Login,
+    meta: { 
+      guestOnly: true,
+      hideLayout: true // 🚫 Hide Navbar & Footer
+     }
+  },
+  {
+    path: "/signup",
+    name: "signup",
+    component: Signup,
+    meta: { 
+      guestOnly: true,
+      hideLayout: true // 🚫 Hide Navbar & Footer
+     }
+  },
+
+  /* =========================
+     🔒 PROTECTED ROUTES
+  ========================== */
+
+  {
+    path: "/",
+    name: "home",
+    component: Home,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/aboutus",
+    name: "aboutus",
+    component: AboutUs,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/choice",
+    name: "choice",
+    component: Choice,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/contactus",
+    name: "contactus",
+    component: ContactUs,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/vacation",
+    name: "vacation",
+    component: Vacation,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/vacationdetails",
+    name: "vacationdetails",
+    component: VacationDetails,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/transit",
+    name: "transit",
+    component: Transit,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/transitdetails",
+    name: "transitdetails",
+    component: TransitDetails,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/meeting",
+    name: "meeting",
+    component: Meeting,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/meetingdetails",
+    name: "meetingdetails",
+    component: MeetingDetails,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/service",
+    name: "service",
+    component: Service,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/servicedetails",
+    name: "servicedetails",
+    component: ServiceDetails,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/transport",
+    name: "transport",
+    component: Transport,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/transportdetails",
+    name: "transportdetails",
+    component: TransportDetails,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/administrator",
+    name: "administrator",
+    component: Administrator,
+    meta: {
+      requiresAuth: true,
+      ability: "admin"
+    }
+  },
+
+  /* =========================
+     ❗ FALLBACK
+  ========================== */
+
+  {
+    path: "/:catchAll(.*)",
+    redirect: "/"
+  }
+]
+
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes
+})
+
+/* =========================
+   🔐 GLOBAL AUTH GUARD
+========================== */
+
+router.beforeEach(async (to, from, next) => {
+  const token = TokenService.getToken()
+
+  // 🚫 Logged-in users shouldn't see login/signup
+  if (to.meta.guestOnly && token) {
+    return next("/home")
+  }
+
+  // 🔒 Auth required
+  if (to.meta.requiresAuth && !token) {
+  return next("/login")
+}
+
+  // 🔐 Ability / role check
+  if (to.meta.ability) {
+    const hasAbility = AuthService.hasAbility(to.meta.ability)
+    if (!hasAbility) {
+      alert("You do not have permission to access this page")
+      return next("/home")
+    }
+  }
+
+  next()
+})
+
+export default router
