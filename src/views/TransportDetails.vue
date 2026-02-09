@@ -1,12 +1,16 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import api from '@/services/api.js'  
 import { useTransportsStore } from '@/Store/Transports'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const store = useTransportsStore()
+const authStore = useAuthStore()
 
 const Transport = computed(() => store.selectedTransport)
+const currentUser = computed(() => authStore.user)
 
 function goBack() {
   router.push('/transport')
@@ -19,9 +23,22 @@ const numericPrice = computed(() => {
   return isNaN(num) ? 0 : num
 })
 
-// 🔵 NEW: generate backend tracking link
-function trackClickUrl(serviceId) {
-  return `http://127.0.0.1:8000/api/track-click/${serviceId}`;
+// 🔵 Track click automatically + open website
+async function handleVisit() {
+  if (!Transport.value || !Transport.value.website) return
+
+  try {
+    await api.post('/track-click', {  // ✅ Changed from axios to api, removed base URL
+      service_id: Transport.value.service_id ?? Transport.value.id,
+      service_name: Transport.value.name,
+      name: currentUser.value?.name ?? 'Guest',
+    })
+  } catch (error) {
+    console.error('Tracking failed:', error)
+  } finally {
+    // Always open the website
+    window.open(Transport.value.website, '_blank')
+  }
 }
 </script>
 
@@ -36,7 +53,6 @@ function trackClickUrl(serviceId) {
             :src="Transport?.image" 
             cover
             height="100vh"
-            class="main-image"
           >
             <v-btn
               icon="mdi-arrow-left"
@@ -53,15 +69,15 @@ function trackClickUrl(serviceId) {
         <v-container class="pa-10 pa-md-16">
           <div v-if="Transport" class="content-wrapper">
             <span class="text-overline text-blue font-weight-bold mb-2 d-block">
-              Premium Stay
+              Transport Service
             </span>
 
             <h1 class="text-h2 font-weight-black text-grey-darken-4 mb-6 leading-tight">
-              {{ Transport?.name }}
+              {{ Transport.name }}
             </h1>
             
             <p class="text-h6 text-grey-darken-1 mb-8 leading-relaxed">
-              {{ Transport?.description }}
+              {{ Transport.description }}
             </p>
 
             <v-divider class="mb-8" />
@@ -69,7 +85,7 @@ function trackClickUrl(serviceId) {
             <!-- PRICE -->
             <div class="mb-10">
               <div class="text-subtitle-1 text-grey-lighten-1 mb-1">
-                Nightly Rate
+                Price
               </div>
               <div class="text-h4 font-weight-bold text-blue-darken-3">
                 Ksh {{ numericPrice }}
@@ -84,16 +100,14 @@ function trackClickUrl(serviceId) {
                 OFFICIAL WEBSITE
               </div>
 
-              <a
+              <button
                 v-if="Transport.website"
-                :href="trackClickUrl(Transport.service_id || Transport.id)"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="Transport-link"
+                class="transport-link"
+                @click="handleVisit"
               >
                 Visit Official Website
                 <v-icon size="18" class="ml-2">mdi-open-in-new</v-icon>
-              </a>
+              </button>
 
               <div v-else class="text-grey-lighten-1">
                 Website not available
@@ -136,18 +150,21 @@ function trackClickUrl(serviceId) {
   line-height: 1.8;
 }
 
-/* WEBSITE LINK */
-.Transport-link {
+/* WEBSITE BUTTON */
+.transport-link {
   display: inline-flex;
   align-items: center;
   font-size: 1.1rem;
   font-weight: 600;
   color: #1976d2;
-  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
   transition: all 0.3s ease;
 }
 
-.Transport-link:hover {
+.transport-link:hover {
   color: #0d47a1;
   text-decoration: underline;
 }

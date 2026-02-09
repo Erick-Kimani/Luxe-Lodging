@@ -4,7 +4,6 @@
       <v-app-bar-nav-icon @click="rail = !rail">
         <v-icon>{{ rail ? 'mdi-menu' : 'mdi-menu-open' }}</v-icon>
       </v-app-bar-nav-icon>
-      
       <v-toolbar-title class="font-weight-bold">Admin Dashboard</v-toolbar-title>
       <v-spacer />
       <v-btn icon="mdi-bell-outline" class="mr-2" />
@@ -12,7 +11,6 @@
         {{ userProfile?.name ? userProfile.name.charAt(0).toUpperCase() : 'AD' }}
       </v-avatar>
     </v-app-bar>
-
     <v-navigation-drawer
       v-model="drawer"
       :rail="rail"
@@ -28,7 +26,6 @@
           @click="currentView = 'profile'"
           rounded="lg"
         />
-
         <v-list-item
           prepend-icon="mdi-palm-tree"
           title="1. Vacations"
@@ -36,7 +33,6 @@
           @click="currentView = 'vacations'"
           rounded="lg"
         />
-        
         <v-list-item
           prepend-icon="mdi-bus"
           title="2. Transit"
@@ -44,7 +40,6 @@
           @click="currentView = 'transit'"
           rounded="lg"
         />
-
         <v-list-item
           prepend-icon="mdi-account-group"
           title="3. Meeting"
@@ -52,7 +47,6 @@
           @click="currentView = 'meeting'"
           rounded="lg"
         />
-
         <v-list-item
           prepend-icon="mdi-room-service"
           title="4. Services"
@@ -60,24 +54,28 @@
           @click="currentView = 'services'"
           rounded="lg"
         />
-        
-        <v-list-item prepend-icon="mdi-chart-bar"
-          title="5. Click Analytics"
-          :active="currentView === 'analytics'"
-          @click="loadAnalytics"
+        <v-list-item
+          prepend-icon="mdi-chart-bar"
+          title="5. User Profiles"
+          :active="currentView === 'userProfiles'"
+          @click="currentView = 'userProfiles'"
           rounded="lg"
         />
-
         <v-list-item
-        prepend-icon="mdi-chart-bar"
-        title="6. User Profiles"
-        :active="currentView === 'userProfiles'"
-        @click="currentView = 'userProfiles'"
-        rounded="lg"
-      />
-
+          prepend-icon="mdi-email-outline"
+          title="6. Contact Messages"
+          :active="currentView === 'contacts'"
+          @click="loadContacts"
+          rounded="lg"
+        />
+        <v-list-item
+          prepend-icon="mdi-cursor-default-click"
+          title="7. Click Monitoring"
+          :active="currentView === 'clicks'"
+          @click="currentView = 'clicks'"
+          rounded="lg"
+        />
       </v-list>
-
       <template v-slot:append>
         <div class="pa-2">
           <v-btn
@@ -92,21 +90,6 @@
         </div>
       </template>
     </v-navigation-drawer>
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
     <v-main class="bg-grey-lighten-4">
       <v-container fluid class="pa-6">
         <v-fade-transition hide-on-leave>
@@ -139,11 +122,7 @@
                 <tr>
                   <td><strong>Active/Inactive</strong></td>
                   <td>{{ userProfile?.is_active ? 'Active' : 'Inactive' }}</td>
-                  
                 </tr>
-                
-                
-
                 <tr>
                   <td><strong>Permissions/Abilities</strong></td>
                   <td>
@@ -158,22 +137,6 @@
               </tbody>
             </v-table>
           </v-card>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           <v-card v-if="currentView === 'vacations'" elevation="2" border>
             <v-data-table
               :headers="VacationStore.headers"
@@ -205,23 +168,6 @@
               </template>
             </v-data-table>
           </v-card>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           <v-card v-else-if="currentView === 'transit'" elevation="2" border>
             <v-data-table
               :headers="TransitStore.headers"
@@ -253,8 +199,6 @@
               </template>
             </v-data-table>
           </v-card>
-
-
         <v-card v-else-if="currentView === 'meeting'" elevation="2" border>
             <v-data-table
               :headers="MeetingStore.headers"
@@ -286,30 +230,6 @@
               </template>
             </v-data-table>
           </v-card>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           <v-card v-else-if="currentView === 'services'" elevation="2" border>
             <v-data-table
               :headers="ServiceStore.headers"
@@ -341,51 +261,8 @@
               </template>
             </v-data-table>
           </v-card>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          <v-card v-if="currentView === 'analytics'" elevation="2" border>
-            <v-toolbar flat color="white">
-              <v-toolbar-title class="text-h6 font-weight-medium">
-                📊 Service Click Analytics
-              </v-toolbar-title>
-            </v-toolbar>
-            <v-divider />
-            <v-data-table
-              :headers="analyticsHeaders"
-              :items="clickStats"
-              hover
-            >
-              <template v-slot:item.total_clicks="{ item }">
-                <v-chip color="primary" variant="flat">
-                  {{ item.total_clicks }}
-                </v-chip>
-              </template>
-            </v-data-table>
-          </v-card>
-
-
-
+          
+          
 
       <v-card v-else-if="currentView === 'userProfiles'" elevation="2" border>
     <v-toolbar flat color="white">
@@ -393,16 +270,13 @@
       6. User Profiles
     </v-toolbar-title>
   </v-toolbar>
-
   <v-divider />
-
   <v-data-table
     :items="users"
     :headers="userHeaders"
     :loading="loadingUsers"
     hover
   >
-  
     <template #item.is_active="{ item }">
       <v-chip
         :color="item.is_active ? 'green' : 'grey'"
@@ -414,10 +288,114 @@
   </v-data-table>
 </v-card>
 
+<!-- Updated Contacts Section with Reply Functionality -->
+<v-card v-else-if="currentView === 'contacts'" elevation="2" border>
+  <v-toolbar flat color="white">
+    <v-toolbar-title class="text-h6 font-weight-medium">
+      7. Contact Messages
+    </v-toolbar-title>
+    <v-spacer />
+    <v-btn 
+      icon="mdi-refresh" 
+      @click="loadContacts" 
+      :loading="loadingContacts"
+    />
+  </v-toolbar>
+  <v-divider />
+  <v-data-table
+    :headers="contactHeaders"
+    :items="contacts"
+    :item-key="'id'"
+    :loading="loadingContacts"
+    hover
+  >
+    <!-- Status indicator -->
+    <template #item.status="{ item }">
+      <v-chip
+        :color="item.reply ? 'green' : 'orange'"
+        size="small"
+      >
+        {{ item.reply ? 'Replied' : 'Pending' }}
+      </v-chip>
+    </template>
+
+    <!-- Truncate long messages -->
+    <template #item.message="{ item }">
+      <span>
+        {{ item.message.length > 60
+          ? item.message.substring(0, 60) + '...'
+          : item.message }}
+      </span>
+    </template>
+
+    <!-- Reply preview -->
+    <template #item.reply="{ item }">
+      <span v-if="item.reply" class="text-grey">
+        {{ item.reply.length > 40
+          ? item.reply.substring(0, 40) + '...'
+          : item.reply }}
+      </span>
+      <span v-else class="text-grey-lighten-1">—</span>
+    </template>
+
+    <!-- Action buttons -->
+    <template #item.actions="{ item }">
+      <div class="d-flex ga-1">
+        <v-btn
+          icon="mdi-eye"
+          variant="text"
+          color="blue"
+          size="small"
+          @click="viewContact(item)"
+        />
+        <v-btn
+          icon="mdi-reply"
+          variant="text"
+          color="green"
+          size="small"
+          @click="openReplyDialog(item)"
+        />
+        <v-btn
+          icon="mdi-delete"
+          variant="text"
+          color="red"
+          size="small"
+          @click="deleteContact(item.id)"
+        />
+      </div>
+    </template>
+  </v-data-table>
+</v-card>
+
+<v-card v-else-if="currentView === 'clicks'" elevation="2" border>
+  <v-toolbar flat color="white">
+    <v-toolbar-title class="text-h6 font-weight-medium">
+      7. Click Monitoring Logs
+    </v-toolbar-title>
+    <v-spacer></v-spacer>
+    <v-btn icon="mdi-refresh" @click="fetchClicks" :loading="loadingClicks"></v-btn>
+  </v-toolbar>
+  <v-divider />
+  
+  <v-data-table
+  :items="clicks"
+  :headers="clickHeaders"
+  :loading="loadingClicks"
+  hover
+  items-per-page="10"
+>
+  <template #item.last_clicked_at="{ item }">
+    {{ new Date(item.last_clicked_at).toLocaleString() }}
+  </template>
+</v-data-table>
+
+</v-card>
+
         </v-fade-transition>
       </v-container>
     </v-main>
 
+    <!-- Existing Dialogs -->
     <v-dialog v-model="VacationStore.dialog" max-width="600" persistent>
       <v-card rounded="xl">
         <v-card-title class="pa-6 text-h5">{{ VacationStore.isEditing ? 'Update' : 'Create' }} Vacation</v-card-title>
@@ -438,7 +416,6 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-
     <v-dialog v-model="TransitStore.dialog" max-width="600" persistent>
       <v-card rounded="xl">
         <v-card-title class="pa-6 text-h5">{{ TransitStore.isEditing ? 'Update' : 'Create' }} Transit</v-card-title>
@@ -459,7 +436,6 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-
     <v-dialog v-model="MeetingStore.dialog" max-width="600" persistent>
       <v-card rounded="xl">
         <v-card-title class="pa-6 text-h5">{{ MeetingStore.isEditing ? 'Update' : 'Create' }} Meeting</v-card-title>
@@ -480,7 +456,6 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-
     <v-dialog v-model="ServiceStore.dialog" max-width="600" persistent>
       <v-card rounded="xl">
         <v-card-title class="pa-6 text-h5">{{ ServiceStore.isEditing ? 'Update' : 'Create' }} Service</v-card-title>
@@ -501,13 +476,107 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <!-- NEW: View Contact Dialog -->
+    <v-dialog v-model="viewDialog" max-width="700" persistent>
+      <v-card rounded="xl">
+        <v-card-title class="pa-6 text-h5 d-flex align-center">
+          <v-icon class="mr-2">mdi-email-outline</v-icon>
+          Contact Message Details
+        </v-card-title>
+        <v-divider />
+        <v-card-text class="pa-6">
+          <v-list lines="two">
+            <v-list-item>
+              <v-list-item-title class="font-weight-bold">From</v-list-item-title>
+              <v-list-item-subtitle>{{ selectedContact?.name }}</v-list-item-subtitle>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="font-weight-bold">Email</v-list-item-title>
+              <v-list-item-subtitle>{{ selectedContact?.email }}</v-list-item-subtitle>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="font-weight-bold">Received</v-list-item-title>
+              <v-list-item-subtitle>{{ formatDate(selectedContact?.created_at) }}</v-list-item-subtitle>
+            </v-list-item>
+          </v-list>
+          
+          <v-divider class="my-4" />
+          
+          <div class="mb-4">
+            <h4 class="mb-2">Message:</h4>
+            <p class="text-body-1">{{ selectedContact?.message }}</p>
+          </div>
+
+          <v-divider class="my-4" v-if="selectedContact?.reply" />
+
+          <div v-if="selectedContact?.reply">
+            <h4 class="mb-2 text-green">Your Reply:</h4>
+            <p class="text-body-1">{{ selectedContact?.reply }}</p>
+            <p class="text-caption text-grey mt-2">
+              Sent: {{ formatDate(selectedContact?.replied_at) }}
+            </p>
+          </div>
+        </v-card-text>
+        <v-card-actions class="pa-6">
+          <v-spacer />
+          <v-btn variant="text" @click="viewDialog = false">Close</v-btn>
+          <v-btn 
+            color="green" 
+            variant="elevated" 
+            prepend-icon="mdi-reply"
+            @click="openReplyDialog(selectedContact)"
+          >
+            {{ selectedContact?.reply ? 'Update Reply' : 'Send Reply' }}
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- NEW: Reply Dialog -->
+    <v-dialog v-model="replyDialog" max-width="600" persistent>
+      <v-card rounded="xl">
+        <v-card-title class="pa-6 text-h5">
+          {{ selectedContact?.reply ? 'Update Reply' : 'Send Reply' }}
+        </v-card-title>
+        <v-divider />
+        <v-card-text class="pa-6">
+          <div class="mb-4 pa-4 bg-grey-lighten-4 rounded">
+            <p class="text-caption text-grey mb-2">Original Message from {{ selectedContact?.name }}:</p>
+            <p class="text-body-2">{{ selectedContact?.message }}</p>
+          </div>
+
+          <v-textarea
+            v-model="replyText"
+            label="Your Reply"
+            placeholder="Type your response here..."
+            variant="outlined"
+            rows="5"
+            auto-grow
+            :rules="[v => !!v || 'Reply is required']"
+          />
+        </v-card-text>
+        <v-card-actions class="pa-6">
+          <v-spacer />
+          <v-btn variant="text" @click="closeReplyDialog">Cancel</v-btn>
+          <v-btn 
+            color="primary" 
+            variant="elevated" 
+            width="150"
+            :loading="sendingReply"
+            @click="sendReply"
+          >
+            Send Reply
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-app>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
 import api from "@/services/api";
-
 import { useVacationStore } from "@/stores/vacation";
 import { useTransitStore } from "@/stores/transit";
 import { useMeetingStore } from "@/stores/meeting";
@@ -520,26 +589,51 @@ const ServiceStore = useServiceStore();
 
 const drawer = ref(true);
 const rail = ref(false); 
-const currentView = ref("profile"); // Set default view to profile
-
-const users =ref([]);
+const currentView = ref("profile");
+const users = ref([]);
 const loadingUsers = ref(false);
 const userProfile = ref(null);
-const clickStats = ref([]);
-const analyticsHeaders = [
-  { title: "Service ID", value: "service_id" },
-  { title: "Service Name", value: "service_name" },
-  { title: "Total Clicks", value: "total_clicks" },
-];
+const contacts = ref([]);
+const loadingContacts = ref(false);
+const clicks = ref([]);
+const loadingClicks = ref(false);
+
+// NEW: Reply functionality states
+const viewDialog = ref(false);
+const replyDialog = ref(false);
+const selectedContact = ref(null);
+const replyText = ref('');
+const sendingReply = ref(false);
+
 const userHeaders = [
+  { title: "ID", value: "id" },
   { title: "Name", value: "name" },
   { title: "Email", value: "email" },
   { title: "Role ID", value: "role_id" },
-  { title: "Role Name", value: "role_name" }, // nested property
+  { title: "Role Name", value: "role_name" },
   { title: "Status", value: "is_active" },
 ];
 
-// NEW: API call to get current admin profile
+const contactHeaders = [
+  { title: 'ID', value: 'id' },
+  { title: 'Name', value: 'name' },
+  { title: 'Email', value: 'email' },
+  { title: 'Message', value: 'message' },
+  { title: 'Reply', value: 'reply' },
+  { title: 'Status', value: 'status', sortable: false },
+  { title: 'Received', value: 'created_at' },
+  { title: 'Actions', value: 'actions', sortable: false },
+];
+
+const clickHeaders = [
+  { title: "User ID", key: "user_id", align: "start" },
+  { title: "User Name", key: "user_name" },
+  { title: "Service ID", key: "service_id", align: "start" },
+  { title: "Service Name", key: "service_name" },
+  { title: "Total Clicks", key: "total_clicks", align: "center" },
+  { title: "Last Clicked At", key: "last_clicked_at" },
+];
+
 const fetchAdminProfile = async () => {
   try {
     const res = await api.get("/me");
@@ -548,35 +642,125 @@ const fetchAdminProfile = async () => {
     console.error("Failed to load admin profile info", err);
   }
 };
+
 const fetchUsers = async () => {
   loadingUsers.value = true;
   try {
-    const res =await api.get("/users");
+    const res = await api.get("/users");
     users.value = res.data.user;
-
-
   } catch (err) {
     console.error("Failed to load users", err);
   } finally {
     loadingUsers.value = false;
   }
-}
+};
 
-const loadAnalytics = async () => {
-  currentView.value = "analytics";
+const loadContacts = async () => {
+  currentView.value = 'contacts';
+  loadingContacts.value = true;
+  try {
+    const res = await api.get('/contactuses');
+    contacts.value = res.data.Contactus || []; 
+  } catch (err) {
+    console.error('Failed to load contacts', err);
+    contacts.value = [];
+  } finally {
+    loadingContacts.value = false;
+  }
+};
+
+const deleteContact = async (id) => {
+  if (!confirm('Are you sure you want to delete this message?')) return;
+  
+  try {
+    await api.delete(`/contactuses/${id}`);
+    contacts.value = contacts.value.filter(c => c.id !== id);
+  } catch (err) {
+    console.error('Failed to delete contact', err);
+    alert('Failed to delete message');
+  }
+};
+
+// NEW: View contact details
+const viewContact = (contact) => {
+  selectedContact.value = contact;
+  viewDialog.value = true;
+};
+
+// NEW: Open reply dialog
+const openReplyDialog = (contact) => {
+  selectedContact.value = contact;
+  replyText.value = contact.reply || '';
+  viewDialog.value = false;
+  replyDialog.value = true;
+};
+
+// NEW: Close reply dialog
+const closeReplyDialog = () => {
+  replyDialog.value = false;
+  replyText.value = '';
+  selectedContact.value = null;
+};
+
+// NEW: Send reply
+const sendReply = async () => {
+  if (!replyText.value.trim()) {
+    alert('Please enter a reply');
+    return;
+  }
+
+  sendingReply.value = true;
+  try {
+    const response = await api.post(`/contactuses/${selectedContact.value.id}/reply`, {
+      reply: replyText.value
+    });
+
+    // Update local contact data
+    const index = contacts.value.findIndex(c => c.id === selectedContact.value.id);
+    if (index !== -1) {
+      contacts.value[index] = response.data.Contactus;
+    }
+
+    alert('Reply sent successfully!');
+    closeReplyDialog();
+  } catch (err) {
+    console.error('Failed to send reply', err);
+    alert('Failed to send reply. Please try again.');
+  } finally {
+    sendingReply.value = false;
+  }
+};
+
+// NEW: Format date helper
+const formatDate = (dateString) => {
+  if (!dateString) return 'N/A';
+  return new Date(dateString).toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+const fetchClicks = async () => {
+  loadingClicks.value = true;
   try {
     const res = await api.get("/click-analytics");
-    clickStats.value = res.data;
+    clicks.value = res.data;
   } catch (err) {
-    console.error("Failed to load click analytics", err);
+    console.error("Failed to load clicks", err);
+  } finally {
+    loadingClicks.value = false;
   }
 };
 
 onMounted(async () => {
   try {
-    // Load Admin Profile first
     await fetchAdminProfile();
     await fetchUsers();
+    await loadContacts();
+    await fetchClicks();
     await Promise.all([
       VacationStore.getVacations(),
       TransitStore.getTransits(),

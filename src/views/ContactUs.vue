@@ -1,32 +1,10 @@
-<script setup>
-import { ref } from 'vue'
-
-const contactForm = ref({
-  name: '',
-  email: '',
-  subject: '',
-  message: ''
-})
-
-const loading = ref(false)
-
-const submitForm = () => {
-  loading.value = true
-  setTimeout(() => {
-    alert('Message sent successfully!')
-    loading.value = false
-    contactForm.value = { name: '', email: '', subject: '', message: '' }
-  }, 1500)
-}
-</script>
-
 <template>
   <div class="contact-page">
     <v-container fluid fill-height class="pa-0 d-flex align-center">
       <v-row justify="start" align="center" class="ma-0">
-        
         <v-col cols="11" sm="7" md="5" lg="4" xl="3" class="ml-md-10 ml-lg-16">
-          
+
+          <!-- CONTACT FORM -->
           <v-card class="formal-glass-card" elevation="0">
             <div class="pa-8">
               <div class="mb-8">
@@ -45,7 +23,7 @@ const submitForm = () => {
                   color="amber-lighten-2"
                   class="custom-input mb-4"
                   hide-details
-                ></v-text-field>
+                />
 
                 <label class="input-label">Email Address</label>
                 <v-text-field
@@ -56,7 +34,7 @@ const submitForm = () => {
                   color="amber-lighten-2"
                   class="custom-input mb-4"
                   hide-details
-                ></v-text-field>
+                />
 
                 <label class="input-label">Inquiry Message</label>
                 <v-textarea
@@ -69,7 +47,7 @@ const submitForm = () => {
                   no-resize
                   class="custom-input mb-8"
                   hide-details
-                ></v-textarea>
+                />
 
                 <v-btn
                   block
@@ -95,32 +73,108 @@ const submitForm = () => {
             </div>
           </v-card>
 
+          <!-- ADMIN REPLY CARD -->
+          <v-card
+            v-if="adminReply"
+            class="formal-glass-card mt-6"
+            elevation="0"
+          >
+            <div class="pa-6">
+              <h3 class="formal-reply-title">Reply from Concierge</h3>
+              <div class="gold-divider mb-4"></div>
+
+              <p class="reply-message">
+                {{ adminReply }}
+              </p>
+
+              <p class="reply-date" v-if="replyDate">
+                Replied on {{ replyDate }}
+              </p>
+            </div>
+          </v-card>
+
         </v-col>
       </v-row>
     </v-container>
   </div>
 </template>
 
+<script setup>
+import { ref, watch } from 'vue'
+import api from '@/services/api'
+
+const contactForm = ref({
+  name: '',
+  email: '',
+  message: ''
+})
+
+const loading = ref(false)
+const error = ref(null)
+
+const adminReply = ref(null)
+const replyDate = ref(null)
+
+/* Submit contact form */
+const submitForm = async () => {
+  loading.value = true
+  error.value = null
+
+  try {
+    await api.post('/contactuses', contactForm.value)
+    alert('Message sent successfully!')
+    await fetchReply()
+    contactForm.value.message = ''
+  } catch (err) {
+    console.error('Contact form error:', err)
+    error.value = 'Failed to send message.'
+  } finally {
+    loading.value = false
+  }
+}
+
+/* Fetch admin reply by email */
+const fetchReply = async () => {
+  if (!contactForm.value.email) return
+
+  try {
+    const res = await api.get('/contactuses/reply', {
+      params: { email: contactForm.value.email }
+    })
+
+    adminReply.value = res.data.reply || null
+    replyDate.value = res.data.replied_at || null
+  } catch {
+    adminReply.value = null
+    replyDate.value = null
+  }
+}
+
+/* Auto-check reply when email changes */
+watch(
+  () => contactForm.value.email,
+  () => {
+    adminReply.value = null
+    replyDate.value = null
+    fetchReply()
+  }
+)
+</script>
+
 <style scoped>
-/* --- THE BACKGROUND FIX --- */
 .contact-page {
   min-height: 100vh;
   width: 100%;
-  /* Use /images/ path as fixed in previous step */
   background-image: url('/images/Picture 21 .jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-attachment: scroll;
-  
   display: flex;
   align-items: center;
 }
 
-/* --- FORMAL GLASS DESIGN --- */
 .formal-glass-card {
-  /* Using a lower alpha (0.45) so the background is more visible */
-  background: rgba(0, 0, 0, 0.45) !important; 
+  background: rgba(0, 0, 0, 0.45) !important;
   backdrop-filter: blur(12px) saturate(150%);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 19px !important;
@@ -128,12 +182,19 @@ const submitForm = () => {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
 }
 
-/* --- TYPOGRAPHY --- */
 .formal-title {
   font-size: 1.6rem;
   font-weight: 300;
   letter-spacing: 4px;
   text-transform: uppercase;
+}
+
+.formal-reply-title {
+  font-size: 0.9rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-weight: 400;
+  color: #FFC107;
 }
 
 .gold-divider {
@@ -149,6 +210,19 @@ const submitForm = () => {
   letter-spacing: 1px;
 }
 
+.reply-message {
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.reply-date {
+  margin-top: 12px;
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
 .input-label {
   display: block;
   font-size: 0.65rem;
@@ -158,51 +232,15 @@ const submitForm = () => {
   color: rgba(255, 255, 255, 0.7);
 }
 
-/* --- INPUT STYLING --- */
 .custom-input :deep(.v-field) {
   background: rgba(255, 255, 255, 0.05) !important;
-  border-radius: 0 !important;
-  transition: all 0.3s ease;
 }
 
-.custom-input :deep(.v-field__outline) {
-  --v-field-border-opacity: 0.2 !important;
-}
-
-.custom-input :deep(input::placeholder),
-.custom-input :deep(textarea::placeholder) {
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.3) !important;
-}
-
-/* --- BUTTON STYLING --- */
 .submit-btn {
   background: transparent !important;
   border: 1px solid #FFC107 !important;
   color: #FFC107 !important;
   border-radius: 0 !important;
   letter-spacing: 3px;
-  font-size: 0.8rem;
-  transition: all 0.4s ease;
-}
-
-.submit-btn:hover {
-  background: #FFC107 !important;
-  color: #000 !important;
-  box-shadow: 0 0 20px rgba(255, 193, 7, 0.3);
-}
-
-/* --- FOOTER --- */
-.contact-footer {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.footer-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.4);
-  letter-spacing: 1px;
 }
 </style>

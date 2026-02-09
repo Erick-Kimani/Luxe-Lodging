@@ -186,7 +186,7 @@ const services = [
   { title: 'Restaurants', description: 'Elite dining experiences.', image: 'public/images/Picture 22 .jpg' },
   { title: 'Transport', description: 'Executive travel.', image: 'public/images/Picture 18 .jpg' },
   { title: 'Safari Tours', description: 'Premium safari packages.', image: 'public/images/Picture 4 .jpg' },
-  { title: 'Beach Getaways', description: 'Luxury coastal escapes.', image: 'public/images/Picture 5 .jpg' }
+  { title: 'Beach Getaways', description: 'Luxury coastal escapes.', image: 'public/images/Picture 23 .jpg' }
 ]
 
 const fanStyle = (index) => {

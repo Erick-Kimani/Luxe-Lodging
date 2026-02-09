@@ -45,6 +45,12 @@
           </router-link>
         </li>
 
+        <li v-if="isLoggedIn && isAdmin">
+          <router-link to="/clickanalytics" class="nav-link" active-class="active">
+            Click Analytics
+          </router-link>
+        </li>
+
       </ul>
 
       <!-- CTA -->

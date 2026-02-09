@@ -1,12 +1,16 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import api from '@/services/api.js' 
 import { useTransitsStore } from '@/Store/Transits'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const store = useTransitsStore()
+const authStore = useAuthStore()
 
 const transit = computed(() => store.selectedTransit)
+const currentUser = computed(() => authStore.user)
 
 function goBack() {
   router.push('/transits')
@@ -19,16 +23,30 @@ const numericPrice = computed(() => {
   return isNaN(num) ? 0 : num
 })
 
-// 🔵 NEW: generate backend tracking link
-function trackClickUrl(serviceId) {
-  return `http://127.0.0.1:8000/api/track-click/${serviceId}`;
+// 🔵 Track click automatically + open website
+async function handleVisit() {
+  if (!transit.value?.website) return
+
+  try {
+    await api.post('/track-click', {  // ✅ Changed from axios to api, removed base URL
+      service_id: transit.value.service_id ?? transit.value.id,
+      service_name: transit.value.name,
+      name: currentUser.value?.name ?? 'Guest',
+    })
+  } catch (error) {
+    console.error('Transit click tracking failed:', error)
+  } finally {
+    // ✅ Navigation must ALWAYS happen
+    window.open(transit.value.website, '_blank')
+  }
 }
 </script>
+
 
 <template>
   <v-main class="pa-0 ma-0 bg-white min-h-screen">
     <v-row no-gutters class="fill-height min-h-screen">
-      
+
       <!-- IMAGE SECTION -->
       <v-col cols="12" md="6" lg="5" class="relative overflow-hidden">
         <div class="full-page-inset">
@@ -52,16 +70,17 @@ function trackClickUrl(serviceId) {
       <v-col cols="12" md="6" lg="7" class="d-flex align-center bg-white">
         <v-container class="pa-10 pa-md-16">
           <div v-if="transit" class="content-wrapper">
+
             <span class="text-overline text-blue font-weight-bold mb-2 d-block">
               Premium Stay
             </span>
 
             <h1 class="text-h2 font-weight-black text-grey-darken-4 mb-6 leading-tight">
-              {{ transit?.name }}
+              {{ transit.name }}
             </h1>
-            
+
             <p class="text-h6 text-grey-darken-1 mb-8 leading-relaxed">
-              {{ transit?.description }}
+              {{ transit.description }}
             </p>
 
             <v-divider class="mb-8" />
@@ -84,26 +103,25 @@ function trackClickUrl(serviceId) {
                 OFFICIAL WEBSITE
               </div>
 
-              <!-- 🔵 UPDATED LINK -->
-              <a
+              <button
                 v-if="transit.website"
-                :href="trackClickUrl(transit.service_id || transit.id)"
-                target="_blank"
-                rel="noopener noreferrer"
+                @click="handleVisit"
                 class="transit-link"
+                type="button"
               >
                 Visit Official Website
                 <v-icon size="18" class="ml-2">mdi-open-in-new</v-icon>
-              </a>
+              </button>
 
               <div v-else class="text-grey-lighten-1">
                 Website not available
               </div>
             </div>
+
           </div>
 
           <v-alert v-else type="error" icon="mdi-alert-circle">
-            transit data missing. Please return to the gallery.
+            Transit data missing. Please return to the gallery.
           </v-alert>
         </v-container>
       </v-col>
@@ -137,14 +155,17 @@ function trackClickUrl(serviceId) {
   line-height: 1.8;
 }
 
-/* WEBSITE LINK */
+/* WEBSITE BUTTON */
 .transit-link {
   display: inline-flex;
   align-items: center;
   font-size: 1.1rem;
   font-weight: 600;
   color: #1976d2;
-  text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 

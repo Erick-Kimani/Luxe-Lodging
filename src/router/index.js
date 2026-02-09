@@ -6,6 +6,7 @@ import AboutUs from "@/views/Aboutus.vue"
 import Login from "@/views/Login.vue"
 import Signup from "@/views/Signup.vue"
 import ContactUs from "@/views/ContactUs.vue"
+import ClickAnalytics from "@/views/ClickAnalytics.vue"
 import Transit from "@/views/Transit.vue"
 import TransitDetails from "@/views/TransitDetails.vue"
 import Administrator from "@/views/Administrator.vue"
@@ -147,10 +148,20 @@ const routes = [
     component: TransportDetails,
     meta: { requiresAuth: true }
   },
+   
   {
     path: "/administrator",
     name: "administrator",
     component: Administrator,
+    meta: {
+      requiresAuth: true,
+      ability: "admin"
+    }
+  },
+  {
+    path: "/clickanalytics",
+    name: "clickanalytics",
+    component: ClickAnalytics,
     meta: {
       requiresAuth: true,
       ability: "admin"

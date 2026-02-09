@@ -50,7 +50,10 @@
           label="Confirm Password"
           variant="outlined"
           color="deep-orange-darken-2"
-          prepend-inner-icon="mdi-lock-check"
+          prepend-inner-icon="mdi-lock"
+          :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+          :type="showPassword ? 'text' : 'password'"
+          @click:append="showPassword = !showPassword"
           type="password"
           required
         />
@@ -78,22 +81,7 @@
           </v-btn>
         </div>
         
-
-
-
       </v-card-text>
-
-      <!-- SUPPLIER SIGN UP -->
-        
-    <div class="text-center"> <v-btn
-    color="yellow"
-    class="mt-5"
-    size="small"
-    @click="registerSupplier"
-    >
-    Sign Up as Supplier
-    </v-btn>
-    </div> 
     </v-card>
   </v-container>
   
@@ -126,15 +114,6 @@ async function signup() {
       password_confirmation: password_confirmation.value,
     });
 
-    // TokenService.setToken(response.data);
-
-    // localStorage.setItem(
-    //   "regularUser",
-    //   JSON.stringify({
-    //     name: name.value,
-    //     email: email.value,
-    //   })
-    // );
 
     alert("Registration successful! Please log in.");
     router.push("/login");
@@ -144,12 +123,6 @@ async function signup() {
   }
 }
 
-// ===============================
-// GO TO SUPPLIER REGISTRATION PAGE
-// ===============================
-function registerSupplier() {
-  router.push("/SupplierRegister");
-}
 
 // LOGIN PAGE NAVIGATION
 function goToLogin() {

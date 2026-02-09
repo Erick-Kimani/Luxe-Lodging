@@ -1,12 +1,17 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import api from '@/services/api.js'  // ✅ Changed this line
+
 import { useVacationsStore } from '@/Store/Vacations'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const store = useVacationsStore()
+const authStore = useAuthStore()
 
 const Vacation = computed(() => store.selectedVacation)
+const currentUser = computed(() => authStore.user)
 
 function goBack() {
   router.push('/vacation')
@@ -19,12 +24,24 @@ const numericPrice = computed(() => {
   return isNaN(num) ? 0 : num
 })
 
-// 🔵 NEW: generate backend tracking link
-function trackClickUrl(serviceId) {
-  return `http://127.0.0.1:8000/api/track-click/${serviceId}`;
+// 🔵 Track click automatically + open website
+async function handleVisit() {
+  if (!Vacation.value || !Vacation.value.website) return
+
+  try {
+    await api.post('/track-click', {  // ✅ Changed from axios to api
+      service_id: Vacation.value.service_id ?? Vacation.value.id,
+      service_name: Vacation.value.name,
+      name: currentUser.value?.name ?? 'Guest',
+    })
+  } catch (error) {
+    console.error('Tracking failed:', error)
+  } finally {
+    // Always open the website
+    window.open(Vacation.value.website, '_blank')
+  }
 }
 </script>
-
 
 <template>
   <v-main class="pa-0 ma-0 bg-white min-h-screen">
@@ -37,7 +54,6 @@ function trackClickUrl(serviceId) {
             :src="Vacation?.image" 
             cover
             height="100vh"
-            class="main-image"
           >
             <v-btn
               icon="mdi-arrow-left"
@@ -79,24 +95,20 @@ function trackClickUrl(serviceId) {
 
             <v-divider class="mb-8" />
 
-
-
             <!-- OFFICIAL WEBSITE -->
             <div class="pt-6">
               <div class="text-caption text-grey-lighten-1 mb-2">
                 OFFICIAL WEBSITE
               </div>
 
-              <a
+              <button
                 v-if="Vacation.website"
-                :href="trackClickUrl(Vacation.service_id || Vacation.id)"  
-                target="_blank"
-                rel="noopener noreferrer"
-                class="Vacation-link"
+                class="vacation-link"
+                @click="handleVisit"
               >
                 Visit Official Website
                 <v-icon size="18" class="ml-2">mdi-open-in-new</v-icon>
-              </a>
+              </button>
 
               <div v-else class="text-grey-lighten-1">
                 Website not available
@@ -104,13 +116,6 @@ function trackClickUrl(serviceId) {
             </div>
           </div>
 
-
-
-
-
-
-
-          
           <v-alert v-else type="error" icon="mdi-alert-circle">
             Vacation data missing. Please return to the gallery.
           </v-alert>
@@ -119,9 +124,6 @@ function trackClickUrl(serviceId) {
     </v-row>
   </v-main>
 </template>
-
-
-
 
 <style scoped>
 .min-h-screen {
@@ -149,18 +151,21 @@ function trackClickUrl(serviceId) {
   line-height: 1.8;
 }
 
-/* WEBSITE LINK */
-.Vacation-link {
+/* WEBSITE BUTTON */
+.vacation-link {
   display: inline-flex;
   align-items: center;
   font-size: 1.1rem;
   font-weight: 600;
   color: #1976d2;
-  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
   transition: all 0.3s ease;
 }
 
-.Vacation-link:hover {
+.vacation-link:hover {
   color: #0d47a1;
   text-decoration: underline;
 }
