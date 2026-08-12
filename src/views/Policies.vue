@@ -206,7 +206,7 @@
               <span class="card-icon">🚪</span>
               <h3>Guest & User Access</h3>
             </div>
-            <h4>You're welcome to browse and explore as a guest at any time. However, registered users enjoy enhanced features, personalized recommendations, and a richer overall experience. Sign up to get the most out of what we offer.</h4>
+            <h4>You're welcome to browse and explore as a guest at any time. Therefore, registered users enjoy enhanced features, personalized recommendations, and a richer overall experience. Sign up to get the most out of what we offer.</h4>
           </div>
         </div>
       </div>

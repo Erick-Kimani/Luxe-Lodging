@@ -38,7 +38,7 @@ import FAQ                 from '@/views/FAQ.vue';
 import Policies            from '@/views/Policies.vue';
 
 import AuthService  from '@/services/authService';
-import TokenService from '@/services/TokenService';
+import TokenService from '@/services/TokenService'; // still used in step 4 clearSession
 import { useAuthStore } from '@/stores/auth';
 
 const routes = [
@@ -135,12 +135,14 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // ── 3. Guest-only routes (login/signup) ───────────────────────────────────
-  //    Only redirect away if we already know the session is valid.
-  //    Do NOT call /me here — that would loop on login page for guests.
+  //    Read from the Pinia store so this reflects the state set by
+  //    authStore.login() immediately after a successful login — the module-
+  //    level sessionValid flag is only set in step 4 (requiresAuth routes)
+  //    and would always be false here on the first /login page load.
   if (to.meta.guestOnly) {
-    if (sessionValid) {
-      const abilities = TokenService.getAbilities();
-      return next(abilities?.admin === true ? '/administrator' : '/');
+    const authStore = useAuthStore();
+    if (authStore.isAuthenticated) {
+      return next(authStore.isAdmin ? '/administrator' : '/');
     }
     return next();
   }
